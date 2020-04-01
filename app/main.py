@@ -20,6 +20,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.mixture import GaussianMixture
 
 def getAuthToken():
     authProvider = os.getenv('AUTH_PROVIDER')
@@ -83,8 +85,20 @@ type_defs = gql(clustering_types)
 # Map resolver functions to Query fields using QueryType
 query = QueryType()
 
-# Resolvers are simple python functions
 
+def clusterMembers(y_kmeans, dataToCluster):
+    clusterMembers = []
+    for s in range(len(y_kmeans)):
+        member = {
+            "id": dataToCluster["rows"][s]["id"],
+            "segment": y_kmeans[s]
+        }
+        print(s)
+        clusterMembers.append(member)
+    return clusterMembers
+
+
+# Resolvers are simple python functions
 #cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
 @query.field("cluster")
 def resolve_cluster(*_, dataToCluster, algorithm):
@@ -116,16 +130,15 @@ def resolve_cluster(*_, dataToCluster, algorithm):
         #cluster segements 
         y_kmeans = kmeans.fit_predict(data)
         print(y_kmeans)
+        return clusterMembers(y_kmeans, dataToCluster)
 
-        clusterMembers = []
-        for s in range(len(y_kmeans)):
-            member = {
-                "id": dataToCluster["rows"][s]["id"],
-                "segment": y_kmeans[s]
-            }
-            print(s)
-            clusterMembers.append(member)
-        return clusterMembers
+    elif(algorithm["algorithm"]== "AgglomerativeClustering"):
+        aCluster = AgglomerativeClustering(n_clusters = algorithm["numberOfClusters"])
+        y_kmeans = aCluster.fit_predict(data)
+        return clusterMembers(y_kmeans, dataToCluster)
+    elif(algorithm["algorithm"] == "GaussianMixture"):
+        y_kmeans = GaussianMixture(n_components=algorithm["numberOfClusters"], covariance_type='full', random_state=algorithm["randomSeed"]).fit_predict(data)
+        return clusterMembers(y_kmeans, dataToCluster)
 
 @query.field("calculateWCSS")
 def resolve_wcss(*_, dataToCluster, algorithm):
@@ -148,10 +161,6 @@ def resolve_wcss(*_, dataToCluster, algorithm):
             )
 
         return wcss
-        
-
-
-
 
 
 @query.field("makeBlobsForTesting")
