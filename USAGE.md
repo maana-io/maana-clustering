@@ -7,6 +7,13 @@ cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInp
 Takes DataToCluster Kind which is a row / col matrix and Algorithm which defines the parameters by which to genarate the clusters
 Returns a list of ClusterMember which provides the segment (custer) that the row in the matrix belongs too.
 
+Within the Alogrithm Kind the property algorithm can take on the following values;
+
+algorithm: "KMeans"
+algorithm: "AgglomerativeClustering"
+algorithm: "GaussianMixture"
+
+
 ## calculateWCSS
 calculateWCSS(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [WCSS]
 
@@ -15,6 +22,8 @@ can be used to determine the number of clusters within dataToCluster.
 Within Cluster Some Of Square (WCSS) measures the squared average distance of all the points within a cluster to the cluster centroid.  The goal is to minimise this number.  
 
 Plotting this output will reveal a graph where the "elbow" of the curve reveals the min cluster number within the data. 
+
+Note: this only accepts the property algorithm of Alogrithm to be algorithm: "KMeans"
 
 ## makeBlobsForTesting
 makeBlobsForTesting(samples: Int, clusters: Int, randomState: Int, numberOfFeatures: Int, clusterStandardDeviation: Float): DataToClusterOutput
