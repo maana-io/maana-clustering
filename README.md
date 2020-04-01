@@ -1,16 +1,16 @@
-# Maana Q Knowledge Microservice: Maana Clustering
+# Maana Clustering: maana-clustering 
 
+# Maana Q Knowledge Microservice Template: Python (Ariadne)
+
+- Uses the [Ariadne GraphQL framework](https://ariadnegraphql.org/)
+- Uses the [ASGI Lifespan middlware](https://pypi.org/project/asgi-lifespan/)
+- Concurrency, app server, and containerization is provided by the [Uvicorn+Gunicorn Docker](https://github.com/tiangolo/uvicorn-gunicorn-docker) base image
 
 ## Features
 
-
-
-
-
-
-
-
-
+cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
+makeBlobsForTesting(samples: Int, clusters: Int, randomState: Int, numberOfFeatures: Int, clusterStandardDeviation: Float): DataToClusterOutput
+calculateWCSS(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [WCSS]
 
 ### Maana Q Client (i.e., peer-to-peer)
 
@@ -64,6 +64,33 @@ And, in your resolver:
 
     print(result)
 ```
+
+
+## Containerize
+
+Then you can build your image from the directory that has your Dockerfile, e.g:
+
+```
+docker build -t maana-clustering ./
+```
+
+For details, please refer to the [official documentation](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#development-live-reload).
+
+## Run Locally (via Docker)
+
+To run the GraphQL service locally (Via Docker):
+
+```
+docker run -it -p 8050:8050 -t maana-clustering
+```
+
+and visit http://0.0.0.0:8050
+
+## Editing
+
+To update any changes made to the service you will need to re run docker build.
+
+Note that if you require additional packages such as pandas and numpy you need to add your packages to the pip install in the Dockerfile. There are a few difficulties with installing these additional packages, this: https://github.com/docker-library/python/issues/381 explains the issue and the resolution.
 
 ## Deploy
 

@@ -1,3 +1,38 @@
+
+## Features
+
+## cluster
+cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
+
+Takes DataToCluster Kind which is a row / col matrix and Algorithm which defines the parameters by which to genarate the clusters
+Returns a list of ClusterMember which provides the segment (custer) that the row in the matrix belongs too.
+
+## calculateWCSS
+calculateWCSS(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [WCSS]
+
+can be used to determine the number of clusters within dataToCluster.  
+
+Within Cluster Some Of Square (WCSS) measures the squared average distance of all the points within a cluster to the cluster centroid.  The goal is to minimise this number.  
+
+Plotting this output will reveal a graph where the "elbow" of the curve reveals the min cluster number within the data. 
+
+## makeBlobsForTesting
+makeBlobsForTesting(samples: Int, clusters: Int, randomState: Int, numberOfFeatures: Int, clusterStandardDeviation: Float): DataToClusterOutput
+
+This provides a data set to test the above functions.  
+
+Example: 3 features 2 samples
+ [ 
+   [ f1, f2, f3 ]
+   [ f1, f2, f3 ]
+]
+
+
+## Queries
+
+The following queries can be run from the graphQL playground
+
+## create a sample data set
 query{
   makeBlobsForTesting(
     samples:10
@@ -7,8 +42,14 @@ query{
     clusterStandardDeviation:1.0
   ){
     id
+    rows {
+        id
+        values
+    }
   }
 }
+
+## cluster a sample data set
 
 query{
     cluster(
@@ -109,8 +150,11 @@ query{
 
     ){
       id
+      segment
     }
 }
+
+## Calculate the WCSS
 
 query{
     calculateWCSS(
