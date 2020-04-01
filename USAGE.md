@@ -40,6 +40,8 @@ Example: 3 features 2 samples
 
 Computes the mean Silhouette Coefficient of all samples.
 
+The silhouette ranges from −1 to +1, where a high value indicates that the object is well matched to its own cluster and poorly matched to neighboring clusters.
+
 ## Queries
 
 The following queries can be run from the graphQL playground
