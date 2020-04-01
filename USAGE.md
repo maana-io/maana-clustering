@@ -4,10 +4,10 @@
 ## cluster
 cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
 
-Takes DataToCluster Kind which is a row / col matrix and Algorithm which defines the parameters by which to genarate the clusters
+Takes DataToCluster Kind which is a row / col matrix and ClusterAlgorithm which defines the parameters by which to genarate the clusters
 Returns a list of ClusterMember which provides the segment (custer) that the row in the matrix belongs too.
 
-Within the Alogrithm Kind the property algorithm can take on the following values;
+Within the ClusterAlogrithm Kind the property algorithm can take on the following values;
 
 algorithm: "KMeans"
 algorithm: "AgglomerativeClustering"
@@ -23,7 +23,7 @@ Within Cluster Some Of Square (WCSS) measures the squared average distance of al
 
 Plotting this output will reveal a graph where the "elbow" of the curve reveals the min cluster number within the data. 
 
-Note: this only accepts the property algorithm of Alogrithm to be algorithm: "KMeans"
+Note: this only accepts the property algorithm of ClusterAlgorithm to be algorithm: "KMeans"
 
 ## makeBlobsForTesting
 makeBlobsForTesting(samples: Int, clusters: Int, randomState: Int, numberOfFeatures: Int, clusterStandardDeviation: Float): DataToClusterOutput
@@ -36,6 +36,9 @@ Example: 3 features 2 samples
    [ f1, f2, f3 ]
 ]
 
+## computeAverageSilhouetteScore
+
+Computes the mean Silhouette Coefficient of all samples.
 
 ## Queries
 

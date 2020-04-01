@@ -5,7 +5,7 @@ type Query {
   cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
   makeBlobsForTesting(samples: Int, clusters: Int, randomState: Int, numberOfFeatures: Int, clusterStandardDeviation: Float): DataToClusterOutput
   calculateWCSS(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [WCSS]
-  computeCorrelation: String
+  computeAverageSilhouetteScore(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): SilhouetteScore
   CKGErrors: [String]
 }
 
@@ -20,6 +20,11 @@ type WCSS {
   id: ID!
   clusterNumber: Int
   value: Float
+}
+
+type SilhouetteScore {
+  id: ID!
+  meanSilhouetteCoefficient: Float
 }
 
 type ClusteringAlgorithm {
