@@ -47,7 +47,7 @@ input ClusteringAlgorithmAsInput {
 
 type ClusterMember {
   id: ID!
-  segment: Int
+  segement: Int
 }
 
 type DataToCluster {
@@ -80,12 +80,22 @@ scalar JSON
 
 type Row {
   id: ID!
-  values: [Float]
+  values: [Value]
+}
+
+type Value {
+  id: ID!
+  value: Float
+}
+
+input ValueAsInput {
+  id: ID!
+  value: Float
 }
 
 input RowAsInput {
   id: ID!
-  values: [Float]
+  values: [ValueAsInput]
 }
 
 type RowOutput {

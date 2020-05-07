@@ -92,23 +92,38 @@ def clusterMembers(y_kmeans, dataToCluster):
     for s in range(len(y_kmeans)):
         member = {
             "id": dataToCluster["rows"][s]["id"],
-            "segment": y_kmeans[s]
+            "segement": y_kmeans[s]
         }
-        print(s)
+        
         clusterMembers.append(member)
+    print(clusterMembers)
+    
     return clusterMembers
 
 def transformDataToCluster(dataToCluster):
     data = []
+    values = []
     for r in dataToCluster["rows"]:
-        data.append(r["values"])
+    	for v in r["values"]:
+    		values.append(v["value"])
+    	data.append(values)
+    	values = []
     return data
 
+def createDataFrame(dataToCluster):
+    colnames = []
+    for c in dataToCluster["rows"][0]["values"]:
+	    colnames.append(c['id'])
+    
+    dataT = transformDataToCluster(dataToCluster)
+    df = pd.DataFrame(dataT, columns = colnames)
+    return df
 
 # Resolvers are simple python functions
 #cluster(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [ClusterMember]
 @query.field("cluster")
 def resolve_cluster(*_, dataToCluster, algorithm):
+    #print(dataToCluster)
 
     # # A resolver can access the graphql client via the context.
     # client = info.context["client"]
@@ -126,40 +141,59 @@ def resolve_cluster(*_, dataToCluster, algorithm):
     # print(result)
 
     #transform dataToCluster
-    data = transformDataToCluster(dataToCluster)
 
-
+    df = createDataFrame(dataToCluster)
     if(algorithm["algorithm"] == "KMeans"):
         #creates the algorithm
         kmeans = KMeans(init=algorithm["initializationMethod"], n_clusters=algorithm["numberOfClusters"], random_state=algorithm["randomSeed"], max_iter=algorithm["maxNumberOfIterations"] ,n_init=10)
         #cluster segements 
-        y_kmeans = kmeans.fit_predict(data)
-        print(y_kmeans)
-        return clusterMembers(y_kmeans, dataToCluster)
+        y_kmeans = kmeans.fit_predict(df)
+
+        print("clustering has been done")
+        members = clusterMembers(y_kmeans, dataToCluster)
+        if(len(members)>0):
+            print(members)
+            return members
+        else:
+            members = {
+                "id": "empty",
+                "segement": "none"
+            }
+            print(members)
+            return members
 
     elif(algorithm["algorithm"]== "AgglomerativeClustering"):
         aCluster = AgglomerativeClustering(n_clusters = algorithm["numberOfClusters"])
-        y_kmeans = aCluster.fit_predict(data)
+        y_kmeans = aCluster.fit_predict(df)
         return clusterMembers(y_kmeans, dataToCluster)
     elif(algorithm["algorithm"] == "GaussianMixture"):
-        y_kmeans = GaussianMixture(n_components=algorithm["numberOfClusters"], covariance_type='full', random_state=algorithm["randomSeed"]).fit_predict(data)
-        return clusterMembers(y_kmeans, dataToCluster)
+        y_kmeans = GaussianMixture(n_components=algorithm["numberOfClusters"], covariance_type='full', random_state=algorithm["randomSeed"]).fit_predict(df)
+        members = clusterMembers(y_kmeans, dataToCluster)
+        if(len(members > 0)):
+            return members
+        else:
+            members = {
+                "id": "empty",
+                "segement": "none"
+
+            }
+            return members
 
 
 
 #computeAverageSilhouetteScore(dataToCluster: DataToClusterAsInput, algorithm: ClusteringAlgorithmAsInput): [SilhoutteScore]
 @query.field("computeAverageSilhouetteScore")
 def resolve_silhouette_score(*_, dataToCluster, algorithm):
-    data = transformDataToCluster(dataToCluster)
+    df = createDataFrame(dataToCluster)
     if(algorithm["algorithm"] == "KMeans"):
         #creates the algorithm
         kmeans = KMeans(init=algorithm["initializationMethod"], n_clusters=algorithm["numberOfClusters"], random_state=algorithm["randomSeed"], max_iter=algorithm["maxNumberOfIterations"] ,n_init=10)
         #cluster segements 
-        y_kmeans = kmeans.fit_predict(data)
-        print(y_kmeans)
+        y_kmeans = kmeans.fit_predict(df)
+        # fprint(y_kmeans)
         # The silhouette_score gives the average value for all the samples.
         # This gives a perspective into the density and separation of the formed  clusters
-        silhouette_avg = silhouette_score(data, y_kmeans)
+        silhouette_avg = silhouette_score(df, y_kmeans)
         print(silhouette_avg)
         return {
             "id": "Silhouette Score",
@@ -172,13 +206,13 @@ def resolve_silhouette_score(*_, dataToCluster, algorithm):
 def resolve_wcss(*_, dataToCluster, algorithm):
 
     wcss = []
-    data = transformDataToCluster(dataToCluster)
+    df = createDataFrame(dataToCluster)
 
     if(algorithm["algorithm"] == "KMeans"):
         for i in range(1, 11):
             #creates the algorithm
             kmeans = KMeans(init=algorithm["initializationMethod"], n_clusters=i, random_state=algorithm["randomSeed"], max_iter=algorithm["maxNumberOfIterations"] ,n_init=10)
-            kmeans.fit_predict(data)
+            kmeans.fit_predict(df)
             wcss.append(
                 {
                     "id": "WCSS Cluster " + str(i),
@@ -189,7 +223,7 @@ def resolve_wcss(*_, dataToCluster, algorithm):
 
         return wcss
 
-
+#NEEDS FIXING
 @query.field("makeBlobsForTesting")
 def resolve_make_blobs_for_testing(*_, samples, clusters, randomState, numberOfFeatures, clusterStandardDeviation):
     X, y = make_blobs(n_samples=samples, centers=clusters, cluster_std=clusterStandardDeviation, random_state=randomState, n_features=numberOfFeatures)
